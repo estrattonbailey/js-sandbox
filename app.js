@@ -49,46 +49,114 @@
 	function form(args){
 	  var form, 
 	      nodes,
+	      fields = args.fields || [],
+	      nodesArray = [],
 	      inputs = {}, 
 	      target = {};
 
+	  /*
+	   * inputs = {
+	   *  change: [
+	   *    {
+	   *      el: domNode,
+	   *      validation: 'integer'
+	   *    },
+	   *    ...
+	   *  ]
+	   * }
+	   *
+	   * target = {
+	   *  firstName: 'Eric', 
+	   *  lastName: 'Bailey'
+	   *  ...
+	   * }
+	   */
+
 	  form = document.querySelector(args.form);
 
-	  if (Array.isArray(args.inputs)){
-	    args.inputs.forEach(function(input, i){
-	      nodes = Array.prototype.slice.call(form.querySelectorAll(input.el));
+	  if (Array.isArray(fields)){
+	    args.fields.forEach(function(field,i){
+	      field.nodes = Array.prototype.slice.call(form.querySelectorAll(field.el));
 
-	      if (inputs[input.event]){
-	        nodes.forEach(function(el){
-	          inputs[input.event].push(el)
-	        });
-	      } else {
-	        inputs[input.event] = nodes 
-	      }
-	    });
-	  } else if (typeof args.inputs === 'string'){
-	    nodes = Array.prototype.slice.call(form.querySelectorAll(args.inputs));
-	    inputs['change'] = nodes;
-	  }
+	      field.nodes.forEach(function(node,i){
+	        target[node.getAttribute('name')] = node.value
 
-	  // console.log(inputs)
-
-	  Object.keys(inputs).forEach(function(k){
-	    bind(inputs[k], k);
-	  });
-
-	  function bind(elements, event){
-	    console.log(elements)
-	    elements.forEach(function(el, i){
-	      target[el.getAttribute('name')] = el.value;
-
-	      el.addEventListener(event, function(){
-	        target[el.getAttribute('name')] = el.value
-	      }, false);
+	        node.addEventListener(field.event, function(){
+	          target[node.getAttribute('name')] = node.value
+	        }, false);
+	      });
 	    });
 	  }
 
 	  target = lookout(target);
+
+	  console.log(target)
+
+	  /*
+	  if (Array.isArray(args.inputs)){
+	    args.inputs.forEach(function(input, i){
+	      nodes = Array.prototype.slice.call(form.querySelectorAll(input.el));
+
+	      for (var l = 0; l < nodes.length; l++){
+	        nodesArray.push({
+	          el: nodes[l],
+	          validation: args.inputs[i].validation
+	        });
+	      }
+
+	      if (inputs[input.event]){
+	        for (var l = 0; l < nodes.length; l++){
+	          inputs[input.event].push(nodesArray[l]);
+	        }
+	      } else {
+	        inputs[input.event] = nodesArray 
+	      }
+	    });
+	  } else if (typeof args.inputs === 'string'){
+	    nodes = Array.prototype.slice.call(form.querySelectorAll(args.inputs));
+
+	    for (var l = 0; l < nodes.length; l++){
+	      nodesArray.push({
+	        el: nodes[l],
+	        validation: args.inputs[i].validation
+	      });
+	    }
+
+	    inputs['change'] = nodesArray;
+	  }
+
+	  console.log(inputs)
+
+	  function build(elements){
+	    elements.forEach(function(el, i){
+	      target[el.getAttribute('name')] = el.value;
+	    });
+	  }
+
+	  function bind(elements, element, event){
+	    elements.forEach(function(el, i){
+	      el.addEventListener(event, function(){
+	        target[el.getAttribute('name')] = el.value
+	      }, false);
+
+	      Object.defineProperty(target, el.getAttribute('name'), {
+	        get: function(){
+	          return this.props[el.getAttribute('name')]
+	        }
+	      });
+	    });
+	  }
+
+	  Object.keys(inputs).forEach(function(k){
+	    build(inputs[k]);
+	  });
+
+	  target = lookout(target);
+
+	  Object.keys(inputs).forEach(function(k,i){
+	    bind(inputs[k], k)
+	  });
+	  */
 
 	  return target;
 	}
@@ -99,20 +167,20 @@
 	// });
 	var dateTime = form({
 	  form: '.js-form',
-	  inputs: [
+	  fields: [
 	    {
 	      el: '.js-input', 
-	      validate: 'integer',
+	      validation: 'integer',
 	      event: 'change'
 	    },
 	    {
 	      el: '.js-company', 
-	      validate: 'length',
+	      validation: 'length',
 	      event: 'keyup'
 	    },
 	    {
 	      el: '.js-address', 
-	      validate: 'length',
+	      validation: 'length',
 	      event: 'change'
 	    }
 	  ] 
@@ -127,12 +195,84 @@
 	  console.log(val)
 	});
 
+	console.log(dateTime.age)
+
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.index||(g.index={})).js=f()}})(function(){var define,module,exports;var isObj=__webpack_require__(2);var proto={listeners:{},watch:function(key,cb){var key=key||"all";if(!this.listeners[key]){this.listeners[key]={queue:[]}}this.listeners[key].queue.push(cb)},publish:function(key,val){if(!this.listeners[key])return;this.listeners[key].queue.forEach(function(fn,i){fn(val)})}};function Lookout(source){var target;if(!isObj(source))return console.log("%cPassed parameter ("+source+") is not an object.","background-color:#ff4567;color:#333333");target=Object.create(proto,{props:{value:source}});Object.keys(source).forEach(function(key){Object.defineProperty(target,key,{set:function(val){this.props[key]=val;this.publish(key,val)},get:function(){return this.props[key]}})});return target}return Lookout});
+	(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.index || (g.index = {})).js = f()}})(function(){var define,module,exports;
+	var isObj = __webpack_require__(2);
+
+	/**
+	 * Added as a prototype to each 
+	 * object created with Lookout()
+	 */
+	var proto = {
+	  // cache of callback functions
+	  listeners: {},
+	  // assigns callbacks to keys on object
+	  watch: function(key, cb){
+	    var key = key || 'all'; // TODO: write 'all' functionality 
+
+	    if (!this.listeners[key]){
+	      this.listeners[key] = {
+	        queue: []
+	      };
+	    }
+
+	    this.listeners[key].queue.push(cb);
+	  },
+	  // run all callbacks in specific queue
+	  publish: function(key, val){
+	    // if a callback hasn't been specified yet, return
+	    if (!this.listeners[key]) return;
+
+	    // run callback with changed value as param
+	    this.listeners[key].queue.forEach(function(fn, i){
+	      fn(val);
+	    });
+	  }
+	}
+
+	/**
+	 * Create blank object with proto methods.
+	 * Set props data bucket equal to passed source object.
+	 * Create getters and setters for each property.
+	 * Setter fires this.publish() callback function.
+	 * @param {object} source Any object the user wants to create
+	 */
+	function Lookout(source){
+	  var target;
+
+	  if (!isObj(source)) return console.log('%cPassed parameter ('+source+') is not an object.', 'background-color:#ff4567;color:#333333');
+
+	  target = Object.create(proto, {
+	    props: {
+	      value: source 
+	    }
+	  });
+
+	  Object.keys(source).forEach(function(key){
+	    Object.defineProperty(target, key, { 
+	      set: function(val){ 
+	        this.props[key] = val;
+	        this.publish(key, val);
+	      },
+	      get: function(){
+	        return this.props[key]
+	      },
+	      configurable: true
+	    });
+	  });
+
+	  return target;
+	}
+
+	return Lookout;
+
+	});
 
 
 /***/ },
