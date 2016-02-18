@@ -55,6 +55,10 @@
 
 	  inputs.forEach(function(el, i){
 	    target[el.getAttribute('name')] = el.value;
+
+	    el.addEventListener('change', function(){
+	      target[el.getAttribute('name')] = el.value
+	    }, false);
 	  });
 
 	  target = lookout(target);
@@ -68,6 +72,17 @@
 	});
 
 	console.dir(test);
+
+	test.watch('age', function(val){
+	  console.log(val)
+	});
+
+	test.watch('firstName', function(val){
+	  console.log(val)
+	});
+	test.watch('lastName', function(val){
+	  console.log(val)
+	});
 
 
 /***/ },
