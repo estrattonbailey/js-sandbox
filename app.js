@@ -47,40 +47,83 @@
 	var lookout = __webpack_require__(1);
 
 	function form(args){
-	  var outer, inputs, 
+	  var form, 
+	      nodes,
+	      inputs = {}, 
 	      target = {};
 
-	  outer = document.querySelector(args.outer);
-	  inputs = Array.prototype.slice.call(outer.querySelectorAll(args.inputs));
+	  form = document.querySelector(args.form);
 
-	  inputs.forEach(function(el, i){
-	    target[el.getAttribute('name')] = el.value;
+	  if (Array.isArray(args.inputs)){
+	    args.inputs.forEach(function(input, i){
+	      nodes = Array.prototype.slice.call(form.querySelectorAll(input.el));
 
-	    el.addEventListener('change', function(){
-	      target[el.getAttribute('name')] = el.value
-	    }, false);
+	      if (inputs[input.event]){
+	        nodes.forEach(function(el){
+	          inputs[input.event].push(el)
+	        });
+	      } else {
+	        inputs[input.event] = nodes 
+	      }
+	    });
+	  } else if (typeof args.inputs === 'string'){
+	    nodes = Array.prototype.slice.call(form.querySelectorAll(args.inputs));
+	    inputs['change'] = nodes;
+	  }
+
+	  // console.log(inputs)
+
+	  Object.keys(inputs).forEach(function(k){
+	    bind(inputs[k], k);
 	  });
+
+	  function bind(elements, event){
+	    console.log(elements)
+	    elements.forEach(function(el, i){
+	      target[el.getAttribute('name')] = el.value;
+
+	      el.addEventListener(event, function(){
+	        target[el.getAttribute('name')] = el.value
+	      }, false);
+	    });
+	  }
 
 	  target = lookout(target);
 
 	  return target;
 	}
 
-	var test = form({
-	  outer: '.js-form',
-	  inputs: '.js-input'
+	// var dateTime = form({
+	//   form: '.js-form',
+	//   inputs: '.js-input'
+	// });
+	var dateTime = form({
+	  form: '.js-form',
+	  inputs: [
+	    {
+	      el: '.js-input', 
+	      validate: 'integer',
+	      event: 'change'
+	    },
+	    {
+	      el: '.js-company', 
+	      validate: 'length',
+	      event: 'keyup'
+	    },
+	    {
+	      el: '.js-address', 
+	      validate: 'length',
+	      event: 'change'
+	    }
+	  ] 
 	});
 
-	console.dir(test);
+	console.dir(dateTime);
 
-	test.watch('age', function(val){
+	dateTime.watch('company', function(val){
 	  console.log(val)
 	});
-
-	test.watch('firstName', function(val){
-	  console.log(val)
-	});
-	test.watch('lastName', function(val){
+	dateTime.watch('address', function(val){
 	  console.log(val)
 	});
 
@@ -89,76 +132,7 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.index || (g.index = {})).js = f()}})(function(){var define,module,exports;
-	var isObj = __webpack_require__(2);
-
-	/**
-	 * Added as a prototype to each 
-	 * object created with Lookout()
-	 */
-	var proto = {
-	  // cache of callback functions
-	  listeners: {},
-	  // assigns callbacks to keys on object
-	  watch: function(key, cb){
-	    var key = key || 'all'; // TODO: write 'all' functionality 
-
-	    if (!this.listeners[key]){
-	      this.listeners[key] = {
-	        queue: []
-	      };
-	    }
-
-	    this.listeners[key].queue.push(cb);
-	  },
-	  // run all callbacks in specific queue
-	  publish: function(key, val){
-	    // if a callback hasn't been specified yet, return
-	    if (!this.listeners[key]) return;
-
-	    // run callback with changed value as param
-	    this.listeners[key].queue.forEach(function(fn, i){
-	      fn(val);
-	    });
-	  }
-	}
-
-	/**
-	 * Create blank object with proto methods.
-	 * Set props data bucket equal to passed source object.
-	 * Create getters and setters for each property.
-	 * Setter fires this.publish() callback function.
-	 * @param {object} source Any object the user wants to create
-	 */
-	function Lookout(source){
-	  var target;
-
-	  if (!isObj(source)) return console.log('%cPassed parameter ('+source+') is not an object.', 'background-color:#ff4567;color:#333333');
-
-	  target = Object.create(proto, {
-	    props: {
-	      value: source 
-	    }
-	  });
-
-	  Object.keys(source).forEach(function(key){
-	    Object.defineProperty(target, key, { 
-	      set: function(val){ 
-	        this.props[key] = val;
-	        this.publish(key, val);
-	      },
-	      get: function(){
-	        return this.props[key]
-	      }
-	    });
-	  });
-
-	  return target;
-	}
-
-	return Lookout;
-
-	});
+	(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.index||(g.index={})).js=f()}})(function(){var define,module,exports;var isObj=__webpack_require__(2);var proto={listeners:{},watch:function(key,cb){var key=key||"all";if(!this.listeners[key]){this.listeners[key]={queue:[]}}this.listeners[key].queue.push(cb)},publish:function(key,val){if(!this.listeners[key])return;this.listeners[key].queue.forEach(function(fn,i){fn(val)})}};function Lookout(source){var target;if(!isObj(source))return console.log("%cPassed parameter ("+source+") is not an object.","background-color:#ff4567;color:#333333");target=Object.create(proto,{props:{value:source}});Object.keys(source).forEach(function(key){Object.defineProperty(target,key,{set:function(val){this.props[key]=val;this.publish(key,val)},get:function(){return this.props[key]}})});return target}return Lookout});
 
 
 /***/ },
