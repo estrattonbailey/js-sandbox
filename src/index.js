@@ -67,19 +67,13 @@ function form(args){
   return target;
 }
 
-// var dateTime = form({
-//   form: '.js-form',
-//   inputs: '.js-input'
-// });
 var dateTime = form({
   form: '.js-form',
   fields: [
     {
-      el: '.js-email', 
+      el: '.js-integer', 
       validation: 'integer',
       event: 'keyup'
     }
   ] 
 });
-
-console.dir(dateTime);
