@@ -1,79 +1,94 @@
-var lookout = require('../../lookoutjs/dist/index.js');
+var del = document.documentElement || {};
+var _match = (del.matches || del.webkitMatchesSelector || del.mozMatchesSelector || del.oMatchesSelector || del.msMatchesSelector || function(){return false;});
 
-function form(args){
-  var form, 
-      fields = args.fields || [],
-      target = {};
+var buckets = {};
 
-  var validator = {
-    url: /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
-    date: /\d{4}-\d{1,2}-\d{1,2}/,
-    numeric: /^[0-9]+$/,
-    integer: /^\-?[0-9]+$/,
-    decimal: /^\-?[0-9]*\.?[0-9]+$/,
-    email: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-  }
+var methods = {
+  on: function(event, target, callback){
+    this.bind.call(this, event, target, callback)
+  },
+  bind: function(event, target, callback){
+    if (!this.node){
+      return;
+    }
 
-  function isValidated(val, validation){
-		var v = {
-      integer: function(val){
-        val = parseInt(val, 10);
-        return validator.integer.test(val) ? true : false; 
-      },
-      email: function(val){
-        return validator.email.test(val) ? true : false; 
+    if (!callback && typeof(target) == 'function'){
+      callback = target;
+      target = 'body';
+    }
+
+    this.event = event;
+    this.target = target;
+    this.callback = callback;
+
+    this.node.addEventListener(event, this.handleEvent.bind(this), false);
+  },
+  send: function(){
+    if (buckets[this.path]){
+      buckets[this.path].push(this)
+    } else {
+      buckets[this.path] = [this]
+    }
+
+    this.callback(event);
+  },
+  off: function(){
+    console.log('off')
+    this.node.removeEventListener(this.event, this.handleEvent, false)
+  },
+  handleEvent: function(){
+    event.currentTarget = this.node;
+
+    if (this.findTarget(event)){
+      this.send()
+    } else {
+      console.log('Nope')
+    }
+  },
+	findTarget: function(e){
+		var search = e.target;
+
+    if (_match.call(search, this.target)){
+      return true
+    } else {
+      for (; search;) {
+        search = search.parentNode;
+
+        // If it finds a match
+        if (_match.call(search, this.target)){
+          return true;
+        }
+
+        // If it doesn't, it will search up to the parent context
+        if (search === e.currentTarget){
+          return false;
+        }
       }
     }
-    return v[validation](val);
-
-  }
-
-  form = document.querySelector(args.form);
-
-  if (Array.isArray(fields)){
-    args.fields.forEach(function(field,i){
-      field.nodes = Array.prototype.slice.call(form.querySelectorAll(field.el));
-
-      field.nodes.forEach(function(node,i){
-        target[node.getAttribute('name')] = node.value
-
-        node.addEventListener(field.event, function(){
-          target[node.getAttribute('name')] = node.value
-        }, false);
-      });
-    });
-  }
-
-  target = lookout(target);
-
-  args.fields.forEach(function(field,i){
-    field.nodes = Array.prototype.slice.call(form.querySelectorAll(field.el));
-
-    field.nodes.forEach(function(node,i){
-      Object.defineProperty(target, node.getAttribute('name'), {
-        set: function(val){
-          if (isValidated(val, field.validation)){
-            console.log('%cValidated!', 'color: #333; background-color:#bada55');
-            this.props[node.getAttribute('name')] = val;
-            this.publish(node.getAttribute('name'), val);
-          } else {
-            console.log('%cNot validated!', 'color: #333; background-color:#ff4567');
-          }
-        }
-      });
-    });
+	}
+}
+function listen(node){
+  var _listen = Object.create(methods, {
+    node: {
+      value: node || null
+    },
+    path: {
+      value: window.location.href 
+    }
   });
 
-  return target;
+  return _listen;
 }
 
-var dateTime = form({
-  form: '.js-form',
-  fields: [
-    {
-      el: '.js-integer', 
-      validation: 'integer',
-      event: 'keyup'
-    }
-  ] 
+var outer = document.querySelector('.js-outer');
+
+var test = listen(outer);
+
+test.on('click', '.js-button', function(e){
+  console.log(e)
+  console.log(buckets)
 });
+
+setTimeout(function(){
+  test.off();
+}, 5000);
