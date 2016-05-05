@@ -4,7 +4,7 @@
   "description": "This sandbox repo is currently configured as a form validation tool, using [Lookoutjs](https://github.com/estrattonbailey/lookoutjs) and native getters/setters.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "parallelshell 'webpack --watch' 'live-server'"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,8 @@
   "dependencies": {
     "delegate": "^3.0.1",
     "sektor": "^1.1.4"
+  },
+  "devDependencies": {
+    "parallelshell": "^2.0.0"
   }
 }

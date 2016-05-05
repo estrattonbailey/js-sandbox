@@ -25,3 +25,4 @@ You can optionally pass extra data to the share link.
 ```html
 <a href="#0" data-social="twitter {"hashtags":"social,tech","via":"estrattonbailey"}">Twitter</div>
 <a href="#0" data-social="pinterest {"description":"Custom description!"}">Pinterest</div>
+```
