@@ -1,37 +1,27 @@
-# Form Validation
-This sandbox repo is currently configured as a form validation tool, using [Lookoutjs](https://github.com/estrattonbailey/lookoutjs) and native getters/setters.
+# Social Share
 
-## Usage
-Pass the config object to `form()`, specifying a `<form>` element, and the inputs that you want to bind to.
+## Getting Started
+1. Ensure all relevant meta data is included in your `<head>`.
+```html
+<meta prefix="og: http://ogp.me/ns#" property="og:description" content="A javascript sandbox, by Eric Bailey."/>
+<meta prefix="og: http://ogp.me/ns#" property="og:site_name" content="Sandbox"/>
+<meta prefix="og: http://ogp.me/ns#" property="og:title" content="Sandbox" />
+<meta prefix="og: http://ogp.me/ns#" property="og:image" content="https://s3.amazonaws.com/StartupStockPhotos/uploads/20160503/3.jpg" />
+<meta prefix="og: http://ogp.me/ns#" property="og:url" content="http://estrattonbailey.com" />
 
-This script creates an observable object – the model – using Lookoutjs, and binds the passed event on the DOM node to update the values in the model. It validates by overriding the `setter` method for each property on the model, first validating the values before updating the model.
-```javascript
-var dateTime = form({
-  form: '.js-form',
-  fields: [
-    {
-      el: '.js-email', 
-      validation: 'email',
-      event: 'keyup'
-    },
-    {
-      el: '.js-name', 
-      validation: 'string',
-      event: 'keyup'
-    }
-  ] 
-});
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sandbox">
+<meta name="twitter:description" content="A javascript sandbox, by Eric Bailey.">
+<meta name="twitter:image" content="https://s3.amazonaws.com/StartupStockPhotos/uploads/20160503/3.jpg">
 ```
-
-## Todo
-1. Expand validation capabilities.
-2. Add classes to the inputs that contain errors.
-3. Potentially pass the error value onto the `watch()` method of Lookoutjs.
-4. Create generic interface for creating a new form, perhaps checking a `data-attribute` for validation keywords on specific inputs:
-```javascript
-var dateTime = form({
-  form: '.js-form',
-  inputs: '.js-input',
-  event: 'change'
-});
+2. Add `data-social` attribute to share links, with the name of the network that link should share to.
+```html
+<a href="#0" data-social="twitter">Twitter</div>
 ```
+3. That's it! The plugin will open a share dialog when your share link is clicked.
+
+### Options
+You can optionally pass extra data to the share link.
+```html
+<a href="#0" data-social="twitter {"hashtags":"social,tech","via":"estrattonbailey"}">Twitter</div>
+<a href="#0" data-social="pinterest {"description":"Custom description!"}">Pinterest</div>
