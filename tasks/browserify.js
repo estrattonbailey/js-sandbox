@@ -45,7 +45,7 @@ b.on('update', bundle); // on any dep update, runs the bundler
  * Manually import modules/components
  */
 b.require(function(){
-  var Files = glob.sync('./src/assets/js/+(components|modules)/*.js');
+  var Files = glob.sync('./src/assets/js/+(components|modules|lib)/*.js');
   var files = [];
 
   for(var i = 0; i < Files.length; i++) {
