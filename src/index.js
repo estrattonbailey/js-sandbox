@@ -1,3 +1,5 @@
 var social = require('./social.js');
 
-social('[data-social]');
+social({
+  selector: '[data-social]'
+});
