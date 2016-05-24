@@ -71,9 +71,9 @@ function bundle(dev) {
   processLog.start('main.min.js', 'Bundling'); // start processLog
 
   if (dev === false){
-    b.plugin('minifyify', {
-     map: false
-    });
+    // b.plugin('minifyify', {
+    //  map: false
+    // });
   }
 
   b.bundle()

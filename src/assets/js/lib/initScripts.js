@@ -7,16 +7,25 @@
 function prep(el, type){
   var raw;
 
+  window.app[type] = {};
+
   raw = el.getAttribute('data-'+type)
 
   sequences = raw.indexOf(',') ? raw.split(/\,\s|\,/) : raw
 
   sequences.forEach(function(seq){
     var _return,
+        namespace,
         args,
         context,
         snippets = [],
         params = [];
+
+    namespace = seq.split(/\s\#/)[1] || null;
+
+    if (namespace) {
+      seq = seq.slice(0, seq.match(/\s\#/).index)
+    }
 
     /**
      * If snippet has params,
@@ -52,6 +61,7 @@ function prep(el, type){
 
     // Create object to pass to init()
     _return = {
+      namespace: namespace,
       context: context,
       snippets: snippets,
       params: params || []
@@ -73,7 +83,8 @@ function prep(el, type){
  * @param {string} type Classification of script
  */
 function init(el, args, type){
-  var context,
+  var namespace,
+      context,
       returnData,  
       fns = [];
 
@@ -114,6 +125,10 @@ function init(el, args, type){
    * Fire main snippet
    */
   var instance = new context(el, returnData)
+
+  if (args.namespace) {
+    window.app[type][args.namespace] = instance;
+  }
 
   if (typeof jQuery !== 'undefined'){
     $(el).data(type, instance);

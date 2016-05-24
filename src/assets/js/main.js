@@ -5,6 +5,8 @@ var types = [
   'component'
 ]
 
+window.app = {}
+
 document.addEventListener('DOMContentLoaded', function(){
   /**
    * Find all specified elements
