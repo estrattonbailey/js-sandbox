@@ -1,3 +1,5 @@
+window.app = {};
+
 /**
  * Parse data from context element attribute
  *
@@ -8,16 +10,25 @@ function prep(el, type){
   var raw,
       sequences;
 
+  window.app[type] = {};
+
   raw = el.getAttribute('data-'+type)
 
   sequences = raw.indexOf(',') ? raw.split(/\,\s|\,/) : raw
 
   sequences.forEach(function(seq){
     var _return,
+        namespace,
         args,
         context,
         snippets = [],
         params = [];
+
+    namespace = seq.split(/\s\#/)[1] || null;
+
+    if (namespace) {
+      seq = seq.slice(0, seq.match(/\s\#/).index)
+    }
 
     /**
      * If snippet has params,
@@ -87,18 +98,15 @@ function init(el, args, type){
    * Find js snippets and add to 
    * fns array to be called next
    */
-  // context = require('app/js/modules/module')
   try {
-    context = require('app/js/'+type+'s/'+args.context)
+    context = require(type+'s/'+args.context)
   } catch(e) {
     console.log(e.toString())
   }
 
   for (var s = 0; s < args.snippets.length; s++){
     try {
-      // fns[s] = require('./'+args.snippets[s]+'.js')
-      var text = "./"+args.snippets[s]+".js"
-      fns[s] = require(text)
+      fns[s] = require('./'+args.snippets[s]+'.js')
     } catch(e) {
       console.log(e.toString())
     }
@@ -118,6 +126,10 @@ function init(el, args, type){
    * Fire main snippet
    */
   var instance = new context(el, returnData)
+
+  if (args.namespace) {
+    window.app[type][args.namespace] = instance;
+  }
 
   if (typeof jQuery !== 'undefined'){
     $(el).data(type, instance);
