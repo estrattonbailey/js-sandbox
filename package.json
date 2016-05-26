@@ -1,51 +1,48 @@
 {
-  "name": "barrel-shopify-base",
+  "name": "module-init",
   "version": "0.0.1",
   "description": "",
-  "main": "gulpfile.js",
-  "scripts": {},
+  "main": "package.json",
+  "scripts": {
+    "browserify:build": "browserify src/js/main.js --debug -p [minifyify --map main.js.map --output dist/assets/main.js.map] > dist/assets/main.min.js",
+    "browserify:dev": "watchify src/js/main.js -v -d -o dist/assets/main.min.js",
+    "setup": "cd node_modules && ln -nsf ../src/ app"
+  },
+  "browserify": {
+    "debug": true,
+    "cache": {},
+    "packageCache": {},
+    "extension": [
+      "js"
+    ],
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015",
+            "react"
+          ]
+        }
+      ]
+    ]
+  },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com:barrel/barrel-shopify-base.git"
+    "url": "git+ssh://"
   },
-  "author": "Barrel, LLC",
+  "author": "estrattonbailey",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/barrel/barrel-shopify-base/issues"
+    "url": ""
   },
-  "homepage": "https://gitlab.com/barrel/barrel-shopify-base#README",
+  "homepage": "",
   "devDependencies": {
-    "autoprefixer": "^6.3.1",
-    "browserify": "^12.0.2",
-    "browserify-shim": "^3.8.12",
-    "del": "^2.2.0",
-    "delete": "^0.3.0",
-    "glob": "^7.0.3",
-    "gulp": "^3.9.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-copy": "0.0.2",
-    "gulp-file": "^0.2.0",
-    "gulp-flatten": "^0.2.0",
-    "gulp-jscs": "^3.0.2",
-    "gulp-jshint": "^2.0.0",
-    "gulp-postcss": "^6.0.1",
-    "gulp-prettify": "^0.4.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.2.0",
-    "gulp-shell": "^0.5.2",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-util": "^3.0.7",
-    "gulp-wrapper": "^1.0.0",
-    "inquirer": "^1.0.0",
-    "jshint": "^2.9.1",
-    "minifyify": "^7.2.1",
-    "pretty-hrtime": "^1.0.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.7.0",
-    "yamljs": "^0.2.7"
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.3.0",
+    "browserify": "^13.0.1",
+    "watchify": "^3.7.0"
   },
-  "dependencies": {},
-  "browser": {},
-  "browserify-shim": {}
+  "dependencies": {}
 }

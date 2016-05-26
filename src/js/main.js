@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function(){
    * javascripts
    */
   types.forEach(function(type){
-    nodes = [].slice.call(document.querySelectorAll('[data-'+type+']'));
+    var nodes = [].slice.call(document.querySelectorAll('[data-'+type+']'));
 
     for (var i = 0; i < nodes.length; i++){
       initScripts(nodes[i], type);

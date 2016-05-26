@@ -5,7 +5,8 @@
  * @param {string} type Classification of script
  */
 function prep(el, type){
-  var raw;
+  var raw,
+      sequences;
 
   raw = el.getAttribute('data-'+type)
 
@@ -86,15 +87,18 @@ function init(el, args, type){
    * Find js snippets and add to 
    * fns array to be called next
    */
+  // context = require('app/js/modules/module')
   try {
-    context = require(type+'s/'+args.context)
+    context = require('app/js/'+type+'s/'+args.context)
   } catch(e) {
     console.log(e.toString())
   }
 
   for (var s = 0; s < args.snippets.length; s++){
     try {
-      fns[s] = require('lib/'+args.snippets[s])
+      // fns[s] = require('./'+args.snippets[s]+'.js')
+      var text = "./"+args.snippets[s]+".js"
+      fns[s] = require(text)
     } catch(e) {
       console.log(e.toString())
     }
