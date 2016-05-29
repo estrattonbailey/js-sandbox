@@ -7,10 +7,9 @@ window.app = {};
  * @param {string} type Classification of script
  */
 function prep(el, type){
-  var raw,
-      sequences;
+  var raw, sequences
 
-  window.app[type] = {};
+  window.app[type] = {}
 
   raw = el.getAttribute('data-'+type)
 
@@ -24,7 +23,7 @@ function prep(el, type){
         snippets = [],
         params = [];
 
-    namespace = seq.split(/\s\#/)[1] || null;
+    namespace = seq.split(/\s\#/)[1] || null
 
     if (namespace) {
       seq = seq.slice(0, seq.match(/\s\#/).index)
@@ -36,12 +35,12 @@ function prep(el, type){
      * passed to the script
      */
     if (seq.indexOf('--') > -1){
-      args = seq.split(/\s\-\-\s/);
+      args = seq.split(/\s\-\-\s/)
 
-      snippets = args[1].split(/\s\|\s/);
+      snippets = args[1].split(/\s\|\s/)
 
       params = [].map.call(args[0].split(/\s/), function(param){
-        return param.replace(/\'/g,'');
+        return param.replace(/\'/g,'')
       });
     } 
     
@@ -50,14 +49,14 @@ function prep(el, type){
      * and we can just call it at that.
      */
     else {
-      snippets.push(seq);
+      snippets.push(seq)
     }
 
     /**
      * Main function. Must be the LAST snippet
      * passed to the attribute
      */
-    context = snippets[snippets.length - 1];
+    context = snippets[snippets.length - 1]
 
     // Remove the context snippet from the array
     snippets.splice(snippets.length -1, 1)
@@ -73,7 +72,7 @@ function prep(el, type){
      * Run init() to fire all snippets
      * and initialize context script
      */
-    init(el, _return, type);
+    init(el, _return, type)
   });
 }
 
@@ -117,8 +116,8 @@ function init(el, args, type){
    */
   if(fns.length) {
     for (var i = 0; i < fns.length; i++){
-      returnData = fns[i](args.params);
-      fns[i+1] ? fns[i+1](returnData) : null;
+      returnData = fns[i](args.params)
+      fns[i+1] ? fns[i+1](returnData) : null
     }
   }
 
@@ -128,11 +127,11 @@ function init(el, args, type){
   var instance = new context(el, returnData)
 
   if (args.namespace) {
-    window.app[type][args.namespace] = instance;
+    window.app[type][args.namespace] = instance
   }
 
   if (typeof jQuery !== 'undefined'){
-    $(el).data(type, instance);
+    $(el).data(type, instance)
   }
 }
 

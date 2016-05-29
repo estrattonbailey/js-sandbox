@@ -1,12 +1,12 @@
 var MODE
 var args = process.argv
-var watchify = require('watchify')
-var browserify = require('browserify')
-var shim = require('browserify-shim')
 var path = require('path')
 var glob = require('glob')
 var fs = require('fs')
+var browserify = require('browserify')
+var watchify = require('watchify')
 var exorcist = require('exorcist')
+var shim = require('browserify-shim')
 
 if (args[2] === '--dev'){
   MODE = 'DEVELOPMENT'
@@ -40,7 +40,7 @@ var b = browserify({
 /**
  * Watchify Plugin 
  */
-b.plugin(watchify);
+b.plugin(watchify)
 
 /**
  * Default Bundler Plugin 
@@ -62,19 +62,19 @@ if (MODE === 'PRODUCTION'){
 /**
  * Watchify emitted 'update' event 
  */
-b.on('update', bundle); // on any dep update, runs the bundler
+b.on('update', bundle) // on any dep update, runs the bundler
 
 /**
  * Emit 'X bytes written (Y seconds)' 
  */
-b.on('log', console.log); 
+b.on('log', console.log)
 
 /**
  * Manually import modules/components
  */
 b.require(function(){
-  var Files = glob.sync('./src/js/+(components|modules|lib)/*.js');
-  var files = [];
+  var Files = glob.sync('./src/js/+(components|modules|lib)/*.js')
+  var files = []
 
   for(var i = 0; i < Files.length; i++) {
     var name = path.basename(Files[i], '.js'),
@@ -87,7 +87,7 @@ b.require(function(){
     });
   }
 
-  return files;
+  return files
 }());
 
 /**

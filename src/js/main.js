@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var nodes = [].slice.call(document.querySelectorAll('[data-'+type+']'));
 
     for (var i = 0; i < nodes.length; i++){
-      initScripts(nodes[i], type);
+      initScripts(nodes[i], type)
     }
   });
 });
