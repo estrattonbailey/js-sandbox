@@ -1,17 +1,12 @@
-var initScripts = require('./lib/initScripts.js');
-
-var types = [
-  'module', 
-  'component'
-]
+var config = require('../../package.json')
+var initScripts = require('./lib/initScripts.js')
 
 document.addEventListener('DOMContentLoaded', function(){
   /**
    * Find all specified elements
-   * in the DOM and init their 
-   * javascripts
+   * in the DOM and init their javascripts
    */
-  types.forEach(function(type){
+  config.barrel.types.forEach(function(type){
     var nodes = [].slice.call(document.querySelectorAll('[data-'+type+']'));
 
     for (var i = 0; i < nodes.length; i++){

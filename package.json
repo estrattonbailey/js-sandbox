@@ -8,25 +8,13 @@
     "browserify:dev": "watchify src/js/main.js -v -d -o dist/assets/main.min.js",
     "setup": "cd node_modules && ln -nsf ../src/ app"
   },
-  "browserify": {
-    "debug": true,
-    "cache": {},
-    "packageCache": {},
-    "extension": [
-      "js"
-    ],
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "es2015",
-            "react"
-          ]
-        }
-      ]
+  "barrel": {
+    "types": [
+      "module",
+      "component"
     ]
   },
+  "browserify-shim": {},
   "repository": {
     "type": "git",
     "url": "git+ssh://"
@@ -42,6 +30,9 @@
     "babel-preset-react": "^6.5.0",
     "babelify": "^7.3.0",
     "browserify": "^13.0.1",
+    "exorcist": "^0.4.0",
+    "file-exists": "^1.0.0",
+    "resolve": "^1.1.7",
     "watchify": "^3.7.0"
   },
   "dependencies": {}

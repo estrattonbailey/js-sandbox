@@ -106,7 +106,7 @@ function init(el, args, type){
 
   for (var s = 0; s < args.snippets.length; s++){
     try {
-      fns[s] = require('./'+args.snippets[s]+'.js')
+      fns[s] = require('lib/'+args.snippets[s])
     } catch(e) {
       console.log(e.toString())
     }
