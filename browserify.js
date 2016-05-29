@@ -8,11 +8,18 @@ var watchify = require('watchify')
 var exorcist = require('exorcist')
 var shim = require('browserify-shim')
 
-if (args[2] === '--dev'){
-  MODE = 'DEVELOPMENT'
-} else {
-  MODE = 'PRODUCTION'
-}
+/**
+ * Parse flags, returns boolean
+ */
+var DEV = args.filter(function(arg){ return arg === '--dev' }).length > 0 ? true : false
+var BUILD = args.filter(function(arg){ return arg === '--build' }).length > 0 ? true : false
+
+/**
+ * Set MODE
+ * Dev: non-minified
+ * Prod: minified
+ */
+MODE = DEV ? 'DEVELOPMENT' : 'PRODUCTION'
 
 /**
  * INIT Browserify
@@ -67,7 +74,10 @@ b.on('update', bundle) // on any dep update, runs the bundler
 /**
  * Emit 'X bytes written (Y seconds)' 
  */
-b.on('log', console.log)
+b.on('log', function(msg){
+  console.log(msg)
+  // setTimeout(process.exit, 100)
+})
 
 /**
  * Manually import modules/components
@@ -94,7 +104,11 @@ b.require(function(){
  * DEFAULT Bundler Function
  */
 function bundle() {
+  var writeFile = fs.createWriteStream('./dist/assets/main.min.js')
+
+  if (BUILD) writeFile.on('close', process.exit)
+
   b.bundle()
     .pipe(exorcist('./dist/main.min.js.map'))
-    .pipe(fs.createWriteStream('./dist/assets/main.min.js'))
+    .pipe(writeFile)
 }
