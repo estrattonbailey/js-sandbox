@@ -74,10 +74,7 @@ b.on('update', bundle) // on any dep update, runs the bundler
 /**
  * Emit 'X bytes written (Y seconds)' 
  */
-b.on('log', function(msg){
-  console.log(msg)
-  // setTimeout(process.exit, 100)
-})
+b.on('log', console.log)
 
 /**
  * Manually import modules/components
@@ -105,6 +102,8 @@ b.require(function(){
  */
 function bundle() {
   var writeFile = fs.createWriteStream('./dist/assets/main.min.js')
+
+  writeFile.on('error', console.log)
 
   if (BUILD) writeFile.on('close', process.exit)
 
