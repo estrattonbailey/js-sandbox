@@ -18,6 +18,7 @@
   "homepage": "https://github.com/estrattonbailey/js-sandbox#readme",
   "dependencies": {
     "delegate": "^3.0.1",
+    "is-plain-object": "^2.0.1",
     "sektor": "^1.1.4"
   }
 }
