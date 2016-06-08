@@ -46,27 +46,23 @@
 
 	var lookout = __webpack_require__(1);
 
-	var obj = {
-	  name: 'Eric', 
+	window.Lookout = lookout({
+	  name: 'Eric',
 	  meta: {
-	    bday: '1992-02-14'
+	    title: 'Old Object'
 	  }
-	}
+	})
 
-	var o = lookout(obj)
-
-	console.dir(o)
-
-	// o.watch('name', function(val){
-	//   console.log(val)
-	// })
-	// o.watch('meta.bday', function(val){
-	//   console.log(val)
-	// })
+	Lookout.watch('name', function(val){
+	  console.log(val)
+	})
+	Lookout.watch('meta', function(val){
+	  console.log(val)
+	})
 
 	setTimeout(function(){
-	  // o.name = 'Ryan'
-	  o.meta.bday = '1990-05-08'
+	  Lookout.name = 'Ryan'
+	  Lookout.meta.title = 'New Title'  
 	}, 1000)
 
 
@@ -76,169 +72,177 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * TODO
-	 * 1. JSDoc
-	 * 2. console.warn
-	 * 3. Add whitespace
-	 * 4. Precompile deps
-	 * 5. bundleDependencies[]
+	 * Check if object and
+	 * not an Array
 	 */
-
-	var isObj = __webpack_require__(2);
+	var isObj = __webpack_require__(3);
 
 	/**
-	 * Added as a prototype to each 
-	 * object created with Lookout()
+	 * Get keypaths to fire in
+	 * this.publish()
 	 */
-	var proto = {
-	  // cache of callback functions
-	  listeners: {},
-	  // assigns callbacks to keys on object
-	  watch: function(key, cb){
-	    key = key === '.' || undefined ? 'all' : key;
+	var getPath = __webpack_require__(10);
 
-	    if (typeof key === 'function'){
-	      cb = key
-	      key = 'all'
-	    }
+	/**
+	 * Root object
+	 */
+	var ROOT;
 
-	    if (!this.listeners[key]){
-	      this.listeners[key] = {
+	/**
+	 * Create prototype chain for
+	 * ROOT object.
+	 *
+	 * NOTE: properties should be enumerable
+	 */
+	var proto = Object.create({}, {
+
+	  /**
+	   * Cache of callback functions
+	   */
+	  listeners: {
+	    value: {
+	      all: {
 	        queue: []
-	      };
-	    }
-
-	    this.listeners[key].queue.push(cb);
-	    console.log(this.listeners)
+	      }
+	    },
+	    enumerable: false
 	  },
-	  // run all callbacks in specific queue
-	  publish: function(key, val){
-	    console.log(key)
-	    // if (this.listeners['all'].queue){
-	    //   for (var i = 0; i < this.listeners['all'].queue.length; i++){
-	    //     this.listeners['all'].queue[i](val);
-	    //   }
-	    // }
 
-	    // if a callback hasn't been specified yet, return
-	    if (!this.listeners[key]) return;
+	  /**
+	   * Assigns callbacks to changes
+	   * at a specified keypath
+	   *
+	   * @param {string} key Full keypath to target key
+	   * @param {object} cb Callback function
+	   */
+	  watch: {
+	    value: function(key, cb){
+	      key = key === '.' || undefined ? 'all' : key;
 
-	    // run callback with changed value as param
-	    for (var i = 0; i < this.listeners[key].queue.length; i++){
-	      this.listeners[key].queue[i](val);
-	    }
+	      if (typeof key === 'function'){
+	        cb = key
+	        key = 'all'
+	      }
+
+	      if (!this.listeners[key]){
+	        this.listeners[key] = {
+	          queue: []
+	        };
+	      }
+
+	      this.listeners[key].queue.push(cb);
+	    },
+	    enumberable: false
+	  },
+
+	  /**
+	   * Run all callbacks at a certain
+	   * keypath key in the this.listeners array
+	   *
+	   * @param {string} key Full keypath to target key
+	   * @param {string|object} val Value that changed, passed to callback 
+	   */
+	  publish: {
+	    value: function(key, val){
+	      if (this.listeners.all.queue.length > -1){
+	        for (var i = 0; i < this.listeners.all.queue.length; i++){
+	          this.listeners.all.queue[i](val);
+	        }
+	      }
+
+	      // if a callback hasn't been specified yet, return
+	      if (!this.listeners[key]) return;
+
+	      // run callback with changed value as param
+	      for (var i = 0; i < this.listeners[key].queue.length; i++){
+	        this.listeners[key].queue[i](val);
+	      }
+	    },
+	    enumerable: false
 	  }
-	}
+	});
 
-	function deepSet(source, target, key, keys){
-		keys.forEach(function(k){
-			Object.defineProperty(target[key], k, { 
-				set: function(val){ 
-	        target.store.root[key][k] = val;
+	/**
+	 * Generate accessors
+	 *
+	 * @param {object} root Context object
+	 * @param {object} srouce Data object
+	 * @param {string} key Key to be set
+	 */
+	function set(root, source, key){
+	  if (!root.store){
+	    Object.defineProperty(root, 'store', {
+	      value: {},
+	      enumerable: false 
+	    })
+	    root.store[key] = source 
+	  }
 
-					this.publish(key, val);
-				},
-				get: function(){
-	        return target.store.root[key][k]
-				}
-			});
+	  // Recusively set objects
+	  if (isObj(source)){
+	    Object.keys(source).forEach(function(k){
+	      set(source, source[k], k)
+	    })
+	  }
+
+	  Object.defineProperty(root, key, { 
+	    set: function(val){ 
+	      root.store[key] = val;
+
+	      var keypath = getPath(ROOT, key, val);
+
+	      /**
+	       * For keypaths, fire callbacks for 
+	       * each sub path in case we have
+	       * listeners on those keypaths
+	       */
+	      keypath.split(/\./).forEach(function(path){
+	        ROOT.publish(keypath, val);
+	        if (keypath.match(/\./)){
+	          keypath = keypath.substring(0, keypath.match(/\.(?!.*\.)/).index)
+	        }
+	      })
+	    },
+	    get: function(){
+	      return root.store[key]
+	    },
+	    configurable: true
 	  });
 	}
 
 	/**
 	 * Create blank object with proto methods.
-	 * Set props data bucket equal to passed source object.
-	 * Create getters and setters for each property.
-	 * Setter fires this.publish() callback function.
+	 *
 	 * @param {object} source Any object the user wants to create
 	 */
 	function Lookout(source){
-	  var target;
+	  if (!isObj(source)) {
+	    return console.warn('Passed parameter ('+source+') is not an object.')
+	  }
 
-	  if (!isObj(source)) return console.log('%cPassed parameter ('+source+') is not an object.', 'background-color:#ff4567;color:#333333');
-
-	  target = Object.create(proto, {
+	  ROOT = Object.create(proto, {
 	    store: {
-	      value: {
-	        root: source 
-	      }
+	      value: source 
 	    }
 	  });
 
-	  // TODO Try defining obj first, then moving up the object to define accessors
+	  Object.assign(ROOT, source)
+
 	  Object.keys(source).forEach(function(key){
-	    childObj = isObj(source[key]);
-
-	    if (childObj){
-	      childObjKeys = Object.keys(source[key]);
-	      deepSet(source, target, key, childObjKeys);
-	    }
-
-	    Object.defineProperty(target, key, { 
-	      set: function(val){ 
-	        this.store.root[key] = val;
-	        this.publish(key, val);
-	      },
-	      get: function(){
-	        return this.store.root[key]
-	      },
-	      configurable: true
-	    });
+	    set(ROOT, source[key], key)
 	  });
 
-
-	  return target;
+	  return ROOT;
 	}
 
 	module.exports = Lookout;
 
 
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*!
-	 * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
-	 *
-	 * Copyright (c) 2014-2015, Jon Schlinkert.
-	 * Licensed under the MIT License.
-	 */
-
-	'use strict';
-
-	var isObject = __webpack_require__(3);
-
-	function isObjectObject(o) {
-	  return isObject(o) === true
-	    && Object.prototype.toString.call(o) === '[object Object]';
-	}
-
-	module.exports = function isPlainObject(o) {
-	  var ctor,prot;
-	  
-	  if (isObjectObject(o) === false) return false;
-	  
-	  // If has modified constructor
-	  ctor = o.constructor;
-	  if (typeof ctor !== 'function') return false;
-	  
-	  // If has modified prototype
-	  prot = ctor.prototype;
-	  if (isObjectObject(prot) === false) return false;
-	  
-	  // If constructor does not have an Object-specific method
-	  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-	    return false;
-	  }
-	  
-	  // Most likely a plain Object
-	  return true;
-	};
-
 
 /***/ },
+/* 2 */,
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/*!
 	 * isobject <https://github.com/jonschlinkert/isobject>
@@ -249,10 +253,81 @@
 
 	'use strict';
 
+	var isArray = __webpack_require__(7);
+
 	module.exports = function isObject(val) {
-	  return val != null && typeof val === 'object'
-	    && !Array.isArray(val);
+	  return val != null && typeof val === 'object' && isArray(val) === false;
 	};
+
+
+/***/ },
+/* 4 */,
+/* 5 */,
+/* 6 */,
+/* 7 */
+/***/ function(module, exports) {
+
+	var toString = {}.toString;
+
+	module.exports = Array.isArray || function (arr) {
+	  return toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 8 */,
+/* 9 */,
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isObj = __webpack_require__(3)
+
+	module.exports = function(root, key, value){
+	  var PATH
+
+	  /**
+	   * @param {string} base Keypath so far
+	   * @param {string} str Key to add to path
+	   */
+	  function join(base, str){
+	    return base.match(/./) ? base+'.'+str : str
+	  }
+
+	  /**
+	   * @param {string} path Keypath so far, passed recursively
+	   * @param {object} obj Context we loop over
+	   */
+	  function traverseDeep(path, obj){ // meta, meta{} 
+	    Object.keys(obj).forEach(function(k){
+	      if (isObj(obj[k])){
+	        traverseDeep(join(path, k), obj[k])
+	      }
+	      else if (k === key && obj[k] === value){
+	        PATH = join(path, k) 
+	      }
+	    })
+	  }
+
+	  /**
+	   * @param {object} obj Root object to start traversal
+	   */
+	  function traverse(obj){
+	    var path = ''
+
+	    Object.keys(obj).forEach(function(k){
+	      if (isObj(obj[k])){
+	        traverseDeep(k, obj[k])
+	      }
+	      else if (k === key && obj[k] === value){
+	        PATH = join(path, k)
+	      }
+	    });
+	  };
+
+	  traverse(root)
+
+	  return PATH 
+	}
 
 
 /***/ }
